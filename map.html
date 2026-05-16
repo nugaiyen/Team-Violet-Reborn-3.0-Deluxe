@@ -2,62 +2,172 @@
 <html>
 
 <head>
-    <title>Flood Map</title>
-    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
-    <link
-        href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css"
-        rel="stylesheet"
-    />
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-        }
+  <title>Flood Dashboard (Mapbox)</title>
 
-        #map {
-            width: 100%;
-            height: 100vh;
-        }
-    </style>
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet"/>
+
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      font-family: Arial;
+    }
+
+    #sidebar {
+    order: 0;
+    width: 20%;
+    height: 100vh;
+    overflow: auto;
+    padding: 12px;
+    background: #111;
+    color: white;
+    }
+
+    #map {
+    order: 1;
+    width: 100%;
+    height: 100vh;
+    }
+
+    .alert {
+      background: #222;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 
 <body>
 
-    <div id="map"></div>
+<div id="map"></div>
 
-    <script>
-    mapboxgl.accessToken = 'pk.eyJ1IjoibnVnYWl5ZW4iLCJhIjoiY21rb29tNzZxMDMzYTNmcHBpYmlkZGJqNSJ9.aa6QqHmav1QDW8cZUNCBhw';
+<div id="sidebar">
+  <h2>Flood Warnings</h2>
+  <p id="status">Loading location...</p>
 
-    navigator.geolocation.getCurrentPosition(function(position) {
+  <h3>⚠️ Active Alerts ⚠️</h3>
+  <div id="alerts">Loading...</div>
+</div>
 
-        const userLng = position.coords.longitude;
-        const userLat = position.coords.latitude;
+<script>
+    mapboxgl.accessToken = "pk.eyJ1IjoibnVnYWl5ZW4iLCJhIjoiY21rb29tNzZxMDMzYTNmcHBpYmlkZGJqNSJ9.aa6QqHmav1QDW8cZUNCBhw";
 
-        const map = new mapboxgl.Map({
-            container: 'map',
-            style: 'mapbox://styles/mapbox/satellite-v9',
-            center: [userLng, userLat],
-            zoom: 15
-        });
+    let map;
+    let userLat, userLon;
 
-        // Optional marker
-        new mapboxgl.Marker()
-            .setLngLat([userLng, userLat])
-            .addTo(map);
 
-    }, function(error) {
-        console.error("Location error:", error);
+    navigator.geolocation.getCurrentPosition(success, error);
 
-        // Fallback location
-        const map = new mapboxgl.Map({
-            container: 'map',
-            style: 'mapbox://styles/mapbox/satellite-v9',
-            center: [-122.3321, 47.6062], // Seattle fallback
-            zoom: 15
-        });
+    function success(pos) {
+    userLat = pos.coords.latitude;
+    userLon = pos.coords.longitude;
+
+    document.getElementById("status").innerText =
+        `Your Location: ${userLat.toFixed(4)}, ${userLon.toFixed(4)} 📍`;
+
+
+    map = new mapboxgl.Map({
+        container: "map",
+        style: "mapbox://styles/mapbox/satellite-v9",
+        center: [userLon, userLat],
+        zoom: 15
     });
+
+    // user marker
+    new mapboxgl.Marker({ color: "red" })
+        .setLngLat([userLon, userLat])
+        .addTo(map);
+
+    // optional: locate button
+    map.addControl(
+        new mapboxgl.GeolocateControl({
+        positionOptions: { enableHighAccuracy: true },
+        trackUserLocation: true
+        })
+    );
+
+    loadAlerts(userLat, userLon);
+    }
+
+    function error() {
+    userLat = 47.6062;
+    userLon = -122.3321;
+
+    map = new mapboxgl.Map({
+        container: "map",
+        style: "mapbox://styles/mapbox/satellite-v9",
+        center: [userLon, userLat],
+        zoom: 12
+    });
+
+    loadAlerts(userLat, userLon);
+    }
+
+// --------------------
+// NOAA ALERTS
+// --------------------
+
+async function loadAlerts(lat, lon) {
+  try {
+    const pointRes = await fetch(
+      `https://api.weather.gov/points/${lat},${lon}`,
+      {
+        headers: {
+          "User-Agent": "flood-dashboard",
+          "Accept": "application/geo+json"
+        }
+      }
+    );
+
+    const pointData = await pointRes.json();
+    const zone = pointData.properties.forecastZone.split("/").pop();
+
+    const alertRes = await fetch(
+      `https://api.weather.gov/alerts/active?zone=${zone}`,
+      {
+        headers: {
+          "User-Agent": "flood-dashboard",
+          "Accept": "application/geo+json"
+        }
+      }
+    );
+
+    const data = await alertRes.json();
+
+    const alertsDiv = document.getElementById("alerts");
+    alertsDiv.innerHTML = "";
+
+    if (!data.features.length) {
+      alertsDiv.innerHTML = "<p>No active alerts ✅</p>";
+      return;
+    }
+
+    data.features.forEach(alert => {
+      const p = alert.properties;
+
+      const box = document.createElement("div");
+      box.className = "alert";
+
+      box.innerHTML = `
+        <h4>${p.event}</h4>
+        <p><b>Severity:</b> ${p.severity}</p>
+        <p><b>Urgency:</b> ${p.urgency}</p>
+        <p>${p.areaDesc}</p>
+        <p>${(p.description || "").slice(0, 150)}...</p>
+      `;
+
+      alertsDiv.appendChild(box);
+    });
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("alerts").innerText =
+      "Failed to load alerts";
+  }
+}
 </script>
-        
 
 </body>
 </html>
