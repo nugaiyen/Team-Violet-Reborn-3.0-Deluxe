@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Emergency Assistance App</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <!-- HOME PAGE -->
+    <section class="home-page">
+
+        <!-- background image -->
+        <img src="img/bgdis.png" alt="Background" class="bg-image">
+
+        <!-- settings -->
+        <button class="settings-btn">
+            <img src="img/settingIcon.png" alt="Settings">
+        </button>
+
+        <!-- app icon -->
+        <div class="icon-container">
+            <img src="img/appIcon.png" alt="App Icon" class="app-icon">
+        </div>
+
+        <!-- view map -->
+        <a href="map.html" class="map-btn">
+            View Map
+        </a>
+
+        <!-- emergency -->
+        <button class="emergency-btn" id="openChat">
+            EMERGENCY
+        </button>
+
+        <!-- contact -->
+        <p class="contact-text">
+            contact us
+        </p>
+
+    </section>
+
+
+
+    <!-- CHAT PAGE -->
+    <section class="chat-page" id="chatPage">
+
+        <!-- top -->
+        <div class="chat-top">
+
+            <!-- leave -->
+            <button class="leave-btn" id="closeChat">
+                Leave
+            </button>
+
+            <!-- settings -->
+            <button class="settings-btn">
+                <img src="img/settingIcon.png" alt="Settings">
+            </button>
+
+        </div>
+
+        <!-- center text -->
+        <div class="chat-center">
+            <h1>
+                Hi, How can I <br>
+                help you?
+            </h1>
+        </div>
+
+        <!-- quick actions -->
+        <div class="quick-actions">
+
+            <button>
+                📍Report
+            </button>
+
+            <button>
+                Food Assist
+            </button>
+
+            <button>
+                Shelter needs
+            </button>
+
+        </div>
+
+        <!-- chat input -->
+        <div class="chat-input">
+
+            <input type="text" placeholder="Say something...">
+
+            <button>
+                ↵
+            </button>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- javascript -->
+    <script src="js/main.js"></script>
+
+</body>
+
+</html>
