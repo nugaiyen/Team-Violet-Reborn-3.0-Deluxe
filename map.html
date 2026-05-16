@@ -36,6 +36,22 @@
       margin-bottom: 10px;
       border-radius: 8px;
     }
+   #rect {
+    background: #960000;
+    color: white;
+    padding: 5px;
+    border-radius: 12px;
+    width: 220px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: Arial;
+    text-align: center;
+    }
+
+#rect:hover {
+  background: #333;
+  transform: scale(1.03);
+}
   </style>
 </head>
 
@@ -49,6 +65,9 @@
 
   <h3>⚠️ Active Alerts ⚠️</h3>
   <div id="alerts">Loading...</div>
+  <div id="rect">
+    <p> Create a report </p>
+  </div>
 </div>
 
 <script>
@@ -140,7 +159,7 @@ async function loadAlerts(lat, lon) {
     alertsDiv.innerHTML = "";
 
     if (!data.features.length) {
-      alertsDiv.innerHTML = "<p>No active alerts</p>";
+      alertsDiv.innerHTML = "<p>No active alerts ✅</p>";
       return;
     }
 
