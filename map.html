@@ -1,1 +1,63 @@
+<!DOCTYPE html>
+<html>
 
+<head>
+    <title>Flood Map</title>
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+    <link
+        href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css"
+        rel="stylesheet"
+    />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #map {
+            width: 100%;
+            height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="map"></div>
+
+    <script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoibnVnYWl5ZW4iLCJhIjoiY21rb29tNzZxMDMzYTNmcHBpYmlkZGJqNSJ9.aa6QqHmav1QDW8cZUNCBhw';
+
+    navigator.geolocation.getCurrentPosition(function(position) {
+
+        const userLng = position.coords.longitude;
+        const userLat = position.coords.latitude;
+
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/satellite-v9',
+            center: [userLng, userLat],
+            zoom: 15
+        });
+
+        // Optional marker
+        new mapboxgl.Marker()
+            .setLngLat([userLng, userLat])
+            .addTo(map);
+
+    }, function(error) {
+        console.error("Location error:", error);
+
+        // Fallback location
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/satellite-v9',
+            center: [-122.3321, 47.6062], // Seattle fallback
+            zoom: 15
+        });
+    });
+</script>
+        
+
+</body>
+</html>
